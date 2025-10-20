@@ -1,6 +1,7 @@
 import datetime
 
 OUTPUT_FILE = "./checking_password_log.txt"
+INPUT_FILE = "./common_passwords.txt"
 
 def get_current_datetime_formatted():
     now = datetime.datetime.now()
@@ -16,27 +17,35 @@ def is_strong_password(password):
     if len(password) <= 8:
         return False
     
+    if is_common_password(password):
+         return False
+
     has_upper = any(char.isupper() for char in password)
     has_lower = any(char.islower() for char in password)
     
     return has_upper and has_lower
 
+def is_common_password(password):
+     common_passwords = read_in_file(INPUT_FILE)
+     common_passwords_list = common_passwords.splitlines()
+
+     return password.lower() in common_passwords_list
 
 def check_password(password):
     
     is_strong = is_strong_password(password)
-    
+    scrambled_password = password[-2:] + password[2:-2] + password[:2]
+
     # Log the check
     with open(OUTPUT_FILE, "a", encoding="utf-8") as f:
         strength = "Strong" if is_strong else "Weak"
         current_time_and_date = get_current_datetime_formatted()
-        f.write(f"{current_time_and_date} - Password checked: {strength}\n")
+        f.write(f"{current_time_and_date} - Password checked: {scrambled_password}. Strength: {strength}\n")
     
     return is_strong
-
-
 
 # Sample calls to test the program
 
 print(check_password("ada"))  # Predict weak password (false)
 print(check_password("AdaLovelace123"))  # Predict strong password (strong is debatable!)  (true)
+print(check_password("password")) 
